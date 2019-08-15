@@ -50,7 +50,7 @@ public class OpenApiService {
             return null;
         }
     }
-    public String getCandiateApiData(String sgId, String sdName, String wiwName) {
+    public JSONObject getCandiateApiData(String sgId, String sdName, String sggName) {
         try {
             StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/9760000/PofelcddInfoInqireService/getPofelcddRegistSttusInfoInqire"); /*URL*/
             String serviceKey = "fZpwa9mNIBJnu%2Bk%2FoHnzvUqya%2FnPJsAFMMsdnQ01w5WSpr%2BuJTGJT1uA5PikFfNOYxoQpl%2FPi6M1LNAi60Fx9Q%3D%3D";
@@ -58,8 +58,8 @@ public class OpenApiService {
             urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
             urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
             urlBuilder.append("&" + URLEncoder.encode("sgId","UTF-8") + "=" + URLEncoder.encode(sgId, "UTF-8")); /*선거ID*/
-            urlBuilder.append("&" + URLEncoder.encode("sgTypecode","UTF-8") + "=" + URLEncoder.encode("4", "UTF-8")); /*선거종류코드*/
-            urlBuilder.append("&" + URLEncoder.encode("sggName","UTF-8") + "=" + URLEncoder.encode(wiwName, "UTF-8")); /*선거구명*/
+            urlBuilder.append("&" + URLEncoder.encode("sgTypecode","UTF-8") + "=" + URLEncoder.encode("2", "UTF-8")); /*선거종류코드*/
+            urlBuilder.append("&" + URLEncoder.encode("sggName","UTF-8") + "=" + URLEncoder.encode(sggName, "UTF-8")); /*선거구명*/
             urlBuilder.append("&" + URLEncoder.encode("sdName","UTF-8") + "=" + URLEncoder.encode(sdName, "UTF-8")); /*시도명*/
             URL url = new URL(urlBuilder.toString());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -80,9 +80,40 @@ public class OpenApiService {
             rd.close();
             conn.disconnect();
             JSONObject jsonObject = XML.toJSONObject(sb.toString());
-            return jsonObject.toString();
+            return jsonObject;
         } catch (Exception e) {
             System.out.println(e);
+            return null;
+        }
+    }
+    String getElectionCode(){
+        try{
+            StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/9760000/CommonCodeService/getCommonSgCodeList"); /*URL*/
+            String serviceKey = "FCP2QZqd3Gp4WgFjf6p72gznY9WKTFusvefoLCiMwtOO1nwhbOWw%2FeG62h1ArYKKEn0cSKDbeE6ZznAEsDsT9w%3D%3D";
+            urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + serviceKey); /*Service Key*/
+            urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
+            urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
+            URL url = new URL(urlBuilder.toString());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Content-type", "application/json");
+            System.out.println("Response code: " + conn.getResponseCode());
+            BufferedReader rd;
+            if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
+                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            } else {
+                rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+            }
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = rd.readLine()) != null) {
+                sb.append(line);
+            }
+            rd.close();
+            conn.disconnect();
+            return sb.toString();
+        }
+        catch(Exception e){
             return null;
         }
     }
