@@ -11,8 +11,5 @@ import java.util.List;
 @Setter
 @ToString
 public class Output {
-    private String jdName;
-    private String edu;
     private String speechText;
-    private String whuwhu;
 }

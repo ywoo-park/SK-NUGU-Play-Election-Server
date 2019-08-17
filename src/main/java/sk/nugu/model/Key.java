@@ -25,7 +25,7 @@ public class Key {
     @Getter
     @Setter
     @ToString
-    public static class WiwName{
+    public static class SggName{
         private String type;
         private String value;
     }

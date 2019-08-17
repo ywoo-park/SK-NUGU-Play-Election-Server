@@ -28,16 +28,18 @@ public class CandidateController {
         this.openApiService = openApiService;
     }
 
-    @RequestMapping(value="/cand", method = {RequestMethod.GET, RequestMethod.POST})
+    // 일반 검색
+    @RequestMapping(value="/general_loc_search", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity getCandidateData(@RequestBody TransactionnReq transactionReq) {
         try {
             String version = transactionReq.getVersion();
             Key.SgId sgId = transactionReq.getAction().getParameters().getSgId();
             Key.SdName sdName = transactionReq.getAction().getParameters().getSdName();
-            Key.WiwName wiwName = transactionReq.getAction().getParameters().getWiwName();
+            Key.SggName sggName = transactionReq.getAction().getParameters().getSggName();
+
             JSONObject result = openApiService.getCandiateApiData(sgId.getValue(),
                    sdName.getValue(),
-                    wiwName.getValue());
+                    sggName.getValue());
             JSONObject items  = result.getJSONObject("response")
                     .getJSONObject("body")
                     .getJSONObject("items");
@@ -46,17 +48,25 @@ public class CandidateController {
             for(int i = 0; i<itemArray.length(); i++){
                 ElectionRes temp = new ElectionRes();
                 JSONObject jsonObject = itemArray.getJSONObject(i);
+                temp.setGiho(jsonObject.getInt("giho"));
                 temp.setJdName(jsonObject.getString("jdName"));
-                temp.setEdu(jsonObject.getString("edu"));
+                temp.setName(jsonObject.getString("name"));
                 electionResList.add(temp);
             }
             TransactionRes transactionRes = new TransactionRes();
             transactionRes.setVersion(version);
 
             Output output = new Output();
-            output.setEdu(electionResList.get(0).getEdu());
-            output.setJdName(electionResList.get(0).getJdName());
-            output.setSpeechText("잘 작동합니다.");
+
+            String txt = "해당 선거구의 후보에는 ";
+
+            for(ElectionRes electionRes :  electionResList){
+                Integer.toString(electionRes.getGiho());
+                txt += ("기호 " + electionRes.getGiho() + "번 "
+                        + electionRes.getJdName() + " " + electionRes.getName() + "후보자 입니다. ");
+            }
+
+            output.setSpeechText(txt);
 
             transactionRes.setOutput(output);
             transactionRes.setResultCode("OK");

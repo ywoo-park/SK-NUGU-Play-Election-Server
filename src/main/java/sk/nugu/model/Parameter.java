@@ -12,5 +12,5 @@ import java.util.List;
 public class Parameter {
     private Key.SgId sgId;
     private Key.SdName sdName;
-    private Key.WiwName wiwName;
+    private Key.SggName sggName;
 }

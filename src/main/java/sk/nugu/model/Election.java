@@ -9,7 +9,8 @@ public class Election {
     @Setter
     @ToString
     public static class ElectionRes{
+        private int giho;
         private String jdName;
-        private String edu;
+        private String name;
     }
 }
