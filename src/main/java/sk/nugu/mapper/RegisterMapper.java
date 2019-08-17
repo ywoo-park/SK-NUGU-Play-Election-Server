@@ -1,9 +1,8 @@
 package sk.nugu.mapper;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 @Mapper
 public interface RegisterMapper {
@@ -16,4 +15,13 @@ public interface RegisterMapper {
             "VALUES(#{sggName})")
     @Options(useGeneratedKeys = true, keyProperty = "sggName", keyColumn="sgg_name")
     void saveSggName(@Param("sggName") final String sggName);
+
+    @Select("SELECT * FROM sgg")
+    @Results(value = {
+            @Result(property = "sggName", column = "sgg_name"),
+    })
+    public String findSggName();
+
+    @Delete("DELETE FROM sgg")
+    void deleteTable();
 }

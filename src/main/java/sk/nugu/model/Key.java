@@ -29,4 +29,20 @@ public class Key {
         private String type;
         private String value;
     }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class Name{
+        private String type;
+        private String value;
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class jdName{
+        private String type;
+        private String value;
+    }
 }

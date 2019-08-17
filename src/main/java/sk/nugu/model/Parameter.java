@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @ToString
 public class Parameter {
-    private Key.SgId sgId;
-    private Key.SdName sdName;
     private Key.SggName sggName;
+    private Key.Name name;
+    private Key.jdName jdName;
 }
