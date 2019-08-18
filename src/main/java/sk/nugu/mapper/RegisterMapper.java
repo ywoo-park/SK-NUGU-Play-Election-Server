@@ -6,22 +6,18 @@ import java.util.List;
 
 @Mapper
 public interface RegisterMapper {
-    @Insert("INSERT INTO sd(sd_name) " +
-            "VALUES(#{sdName})")
-    @Options(useGeneratedKeys = true, keyProperty = "sdName", keyColumn="sd_name")
-    void saveSdName(@Param("sdName") final String sdName);
 
-    @Insert("INSERT INTO sgg(sgg_name) " +
+    @Insert("INSERT INTO registration(sgg_name) " +
             "VALUES(#{sggName})")
     @Options(useGeneratedKeys = true, keyProperty = "sggName", keyColumn="sgg_name")
-    void saveSggName(@Param("sggName") final String sggName);
+    void saveSggNameInRegistration(@Param("sggName") final String sggName);
 
-    @Select("SELECT * FROM sgg")
+    @Select("SELECT * FROM registration ORDER BY id DESC LIMIT 1;")
     @Results(value = {
             @Result(property = "sggName", column = "sgg_name"),
     })
-    public String findSggName();
+    public String findSggNameOfRegistration();
 
-    @Delete("DELETE FROM sgg")
+    @Delete("DELETE FROM registration")
     void deleteTable();
 }

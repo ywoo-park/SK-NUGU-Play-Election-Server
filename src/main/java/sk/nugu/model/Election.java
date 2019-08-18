@@ -23,5 +23,6 @@ public class Election {
         private String job;
         private String edu;
         private String career1;
+        private String birthday;
     }
 }

@@ -18,7 +18,7 @@ public class OpenApiService {
     public String getVoteInfoApiData(String sgId, String sdName, String wiwName) {
         try {
             StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/9760000/PolplcInfoInqireService2/getPolplcOtlnmapTrnsportInfoInqire"); /*URL*/
-            String serviceKey = "FCP2QZqd3Gp4WgFjf6p72gznY9WKTFusvefoLCiMwtOO1nwhbOWw%2FeG62h1ArYKKEn0cSKDbeE6ZznAEsDsT9w%3D%3D";
+            String serviceKey = "CEzqKoF%2FLJegnn83cqdkltDpjGWHL%2FvD1bAx2sFHR43k%2BQAq3ytMvg71IEV35UFQRGN7rKyjas2EQbz6z8lh7Q%3D%3D";
             urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + serviceKey); /*Service Key*/
             urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
             urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
@@ -53,7 +53,7 @@ public class OpenApiService {
     public JSONObject getCandiateApiData(String sggName) {
         try {
             StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/9760000/PofelcddInfoInqireService/getPofelcddRegistSttusInfoInqire"); /*URL*/
-            String serviceKey = "fZpwa9mNIBJnu%2Bk%2FoHnzvUqya%2FnPJsAFMMsdnQ01w5WSpr%2BuJTGJT1uA5PikFfNOYxoQpl%2FPi6M1LNAi60Fx9Q%3D%3D";
+            String serviceKey = "CEzqKoF%2FLJegnn83cqdkltDpjGWHL%2FvD1bAx2sFHR43k%2BQAq3ytMvg71IEV35UFQRGN7rKyjas2EQbz6z8lh7Q%3D%3D";
             urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + serviceKey); /*Service Key*/
             urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
             urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
@@ -88,7 +88,7 @@ public class OpenApiService {
     String getElectionCode(){
         try{
             StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/9760000/CommonCodeService/getCommonSgCodeList"); /*URL*/
-            String serviceKey = "FCP2QZqd3Gp4WgFjf6p72gznY9WKTFusvefoLCiMwtOO1nwhbOWw%2FeG62h1ArYKKEn0cSKDbeE6ZznAEsDsT9w%3D%3D";
+            String serviceKey = "CEzqKoF%2FLJegnn83cqdkltDpjGWHL%2FvD1bAx2sFHR43k%2BQAq3ytMvg71IEV35UFQRGN7rKyjas2EQbz6z8lh7Q%3D%3D";
             urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + serviceKey); /*Service Key*/
             urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
             urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/

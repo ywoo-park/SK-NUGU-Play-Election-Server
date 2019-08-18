@@ -15,10 +15,7 @@ public class RegisterService {
         this.registerMapper = registerMapper;
     }
 
-    public void saveSdName(final String sdName){
-        registerMapper.saveSdName(sdName);
-    }
-    public void saveSggName(final String sggName){
-        registerMapper.saveSggName(sggName);
+    public void saveSggNameInRegistration(final String sggName){
+        registerMapper.saveSggNameInRegistration(sggName);
     }
 }

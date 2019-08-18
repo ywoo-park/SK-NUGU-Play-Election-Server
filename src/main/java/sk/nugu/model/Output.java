@@ -12,4 +12,14 @@ import java.util.List;
 @ToString
 public class Output {
     private String speechText;
+    private String regiSpeechText;
+
+    private String gender;
+    private int age;
+    private String edu;
+    private String job;
+    private String career1;
+    private String birthday;
+
+    private String sggName;
 }

@@ -41,8 +41,9 @@ public class Key {
     @Getter
     @Setter
     @ToString
-    public static class jdName{
+    public static class JdName{
         private String type;
         private String value;
     }
+
 }

@@ -1,6 +1,7 @@
 package sk.nugu.project;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.buf.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
@@ -29,57 +30,7 @@ public class CandidateController {
         this.registerMapper = registerMapper;
     }
 
-    // 일반 검색
-    @RequestMapping(value="/general_loc_search", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity getGeneralCandidateData(@RequestBody TransactionnReq transactionReq) {
-
-        TransactionRes transactionRes = new TransactionRes();
-        Output output = new Output();
-
-        try {
-            String version = transactionReq.getVersion();
-            Key.SggName sggName = transactionReq.getAction().getParameters().getSggName();
-
-            JSONObject result = openApiService.getCandiateApiData(
-                    sggName.getValue());
-            JSONObject items  = result.getJSONObject("response")
-                    .getJSONObject("body")
-                    .getJSONObject("items");
-            JSONArray itemArray = items.getJSONArray("item");
-            List<ElectionRes> electionResList = new ArrayList<>();
-            for(int i = 0; i<itemArray.length(); i++){
-                ElectionRes temp = new ElectionRes();
-                JSONObject jsonObject = itemArray.getJSONObject(i);
-                temp.setGiho(jsonObject.getInt("giho"));
-                temp.setJdName(jsonObject.getString("jdName"));
-                temp.setName(jsonObject.getString("name"));
-                electionResList.add(temp);
-            }
-            transactionRes.setVersion(version);
-            String txt = "해당 선거구의 후보에는 ";
-
-            for(ElectionRes electionRes :  electionResList){
-                Integer.toString(electionRes.getGiho());
-                txt += ("기호 " + electionRes.getGiho() + "번 "
-                        + electionRes.getJdName() + " "+ electionRes.getName() + " 후보자, ");
-            }
-            txt.substring(0,txt.length()-5);
-            txt+= "가 있습니다.";
-            output.setSpeechText(txt);
-
-
-            transactionRes.setOutput(output);
-            transactionRes.setResultCode("OK");
-            return new ResponseEntity<>(transactionRes,HttpStatus.OK);
-        } catch (Exception e) {
-            System.out.println(e);
-            output.setSpeechText("서버 연결 상태가 좋지 않습니다.");
-            transactionRes.setOutput(output);
-            return new ResponseEntity<>(transactionRes, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    // 등록 선거구 기반 검색
+    // 1. 등록 선거구 기반 기본 검색(완료)
     @RequestMapping(value="/registered_loc_search", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity getRegisteredCandidateData(@RequestBody TransactionnReq transactionReq) {
 
@@ -88,7 +39,16 @@ public class CandidateController {
 
         try {
             String version = transactionReq.getVersion();
-            String sggName = registerMapper.findSggName();
+            String sggName;
+
+            if(registerMapper.findSggNameOfRegistration() == null || registerMapper.findSggNameOfRegistration().trim().length() == 0){
+                output.setSpeechText("등록된 선거구가 없습니다.");
+                transactionRes.setOutput(output);
+                return new ResponseEntity<>(transactionRes, HttpStatus.OK);
+            }
+            else{
+                sggName = registerMapper.findSggNameOfRegistration();
+            }
 
             JSONObject result = openApiService.getCandiateApiData(sggName);
             JSONObject items  = result.getJSONObject("response")
@@ -107,7 +67,7 @@ public class CandidateController {
 
             transactionRes.setVersion(version);
 
-            String txt = "해당 선거구의 후보에는 ";
+            String txt = "선거구의 후보에는 ";
 
             for(ElectionRes electionRes :  electionResList){
                 Integer.toString(electionRes.getGiho());
@@ -117,7 +77,6 @@ public class CandidateController {
             txt.substring(0,txt.length()-5);
             txt+= "가 있습니다.";
             output.setSpeechText(txt);
-
             transactionRes.setOutput(output);
             transactionRes.setResultCode("OK");
             return new ResponseEntity<>(transactionRes, HttpStatus.OK);
@@ -129,92 +88,84 @@ public class CandidateController {
         }
     }
 
-    // 상세 검색(성별)
-    @RequestMapping(value="/detailed_gender_search", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity getSpecificGenderCandidateData(@RequestBody TransactionnReq transactionReq) {
+    // 2. 등록 선거구 기반 상세 검색(완료)
+    @RequestMapping(value="/detailed_search", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity getSpecificCandidateData(@RequestBody TransactionnReq transactionReq) {
 
         TransactionRes transactionRes = new TransactionRes();
         Output output = new Output();
 
         try {
             String version = transactionReq.getVersion();
-            Key.SggName sggName = transactionReq.getAction().getParameters().getSggName();
-            Key.Name name= transactionReq.getAction().getParameters().getName();
-            Key.jdName jdName = transactionReq.getAction().getParameters().getJdName();
+            String sggName;
+
+            sggName = registerMapper.findSggNameOfRegistration();
 
             JSONObject result = openApiService.getCandiateApiData(
-                    sggName.getValue());
+                    sggName);
             JSONObject items  = result.getJSONObject("response")
                     .getJSONObject("body")
                     .getJSONObject("items");
             JSONArray itemArray = items.getJSONArray("item");
             ElectionSpecRes temp = new ElectionSpecRes();
+
+            String name = ""; String jdName = "";
+            boolean byName = true;
+
+            if(transactionReq.getAction().getParameters().getName() != null){
+                name = transactionReq.getAction().getParameters().getName().getValue();
+            }
+            else if(transactionReq.getAction().getParameters().getJdName() != null) {
+                jdName = transactionReq.getAction().getParameters().getJdName().getValue();
+                byName = false;
+            }
+            else{
+                output.setSpeechText("검색할 후보자 또는 정당을 다시 말해주세요.");
+                transactionRes.setOutput(output);
+                return new ResponseEntity<>(transactionRes,HttpStatus.OK);
+            }
+
             for(int i = 0; i<itemArray.length(); i++){
                 JSONObject jsonObject = itemArray.getJSONObject(i);
 
-                if(jsonObject.getString("name").equals(name.getValue())
-                || jsonObject.getString("jdName").equals(jdName.getValue())){
+                if(byName && name.equals(jsonObject.getString("name")) ){
                     temp.setGender(jsonObject.getString("gender"));
-                    break;
-                }
-            }
-            transactionRes.setVersion(version);
-
-            String txt = sggName.getValue() + " " + name.getValue() + " 후보는 " + temp.getGender() +"입니다.";
-
-            output.setSpeechText(txt);
-
-            transactionRes.setOutput(output);
-            transactionRes.setResultCode("OK");
-            return new ResponseEntity<>(transactionRes,HttpStatus.OK);
-        } catch (Exception e) {
-            System.out.println(e);
-            output.setSpeechText("서버 연결 상태가 좋지 않습니다.");
-            transactionRes.setOutput(output);
-            return new ResponseEntity<>(transactionRes, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    // 상세 검색(성별)
-    @RequestMapping(value="/detailed_age_search", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity getSpecificAgeCandidateData(@RequestBody TransactionnReq transactionReq) {
-
-        TransactionRes transactionRes = new TransactionRes();
-        Output output = new Output();
-
-        try {
-            String version = transactionReq.getVersion();
-            Key.SggName sggName = transactionReq.getAction().getParameters().getSggName();
-            Key.Name name= transactionReq.getAction().getParameters().getName();
-            Key.jdName jdName = transactionReq.getAction().getParameters().getJdName();
-
-            JSONObject result = openApiService.getCandiateApiData(
-                    sggName.getValue());
-            JSONObject items  = result.getJSONObject("response")
-                    .getJSONObject("body")
-                    .getJSONObject("items");
-            JSONArray itemArray = items.getJSONArray("item");
-            ElectionSpecRes temp = new ElectionSpecRes();
-            for(int i = 0; i<itemArray.length(); i++){
-                JSONObject jsonObject = itemArray.getJSONObject(i);
-
-                if(jsonObject.getString("name").equals(name.getValue())
-                        || jsonObject.getString("jdName").equals(jdName.getValue())){
                     temp.setAge(jsonObject.getInt("age"));
+                    temp.setEdu(jsonObject.getString("edu"));
+                    temp.setJob(jsonObject.getString("job"));
+                    temp.setCareer1(jsonObject.getString("career1"));
+                    String bday = Integer.toString(jsonObject.getInt("birthday"));
+                    String bdayFormat = bday.substring(0,4) + "년 " + bday.substring(4,6) + "월 " + bday.substring(6,8) + "일";
+                    temp.setBirthday(bdayFormat);
                     break;
                 }
+                if(!byName && jdName.equals(jsonObject.getString("jdName"))){
+                    temp.setGender(jsonObject.getString("gender"));
+                    temp.setAge(jsonObject.getInt("age"));
+                    temp.setEdu(jsonObject.getString("edu"));
+                    temp.setJob(jsonObject.getString("job"));
+                    temp.setCareer1(jsonObject.getString("career1"));
+                    String bday = Integer.toString(jsonObject.getInt("birthday"));
+                    String bdayFormat = bday.substring(0,4) + "년 " + bday.substring(4,6) + "월 " + bday.substring(6,8) + "일";
+                    temp.setBirthday(bdayFormat);
+                    break;
+                }
+                if(i == itemArray.length()-1){
+                    output.setSpeechText("선택하신 선거구의 후보가 아닙니다. 다시 말해주세요.");
+                    transactionRes.setOutput(output);
+                    return new ResponseEntity<>(transactionRes,HttpStatus.OK);
+                }
             }
+
             transactionRes.setVersion(version);
-
-            String txt = sggName.getValue() + " " + name.getValue() + " 후보의 나이는 " + temp.getAge() +"세 입니다.";
-
-            output.setSpeechText(txt);
-
+            output.setSpeechText("후보자 조회 성공");
+            output.setAge(temp.getAge()); output.setEdu(temp.getEdu()); output.setCareer1(temp.getCareer1());
+            output.setGender(temp.getGender()); output.setJob(temp.getJob()); output.setBirthday(temp.getBirthday());
             transactionRes.setOutput(output);
             transactionRes.setResultCode("OK");
             return new ResponseEntity<>(transactionRes,HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             output.setSpeechText("서버 연결 상태가 좋지 않습니다.");
             transactionRes.setOutput(output);
             return new ResponseEntity<>(transactionRes, HttpStatus.NOT_FOUND);
@@ -224,5 +175,14 @@ public class CandidateController {
     @RequestMapping(value="/delete", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE})
     void deleteTable(){
         registerMapper.deleteTable();
+    }
+
+    @RequestMapping(value="/CityInfo", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE})
+    public ResponseEntity firstController(){
+        TransactionRes transactionRes = new TransactionRes();
+        Output output = new Output();
+        output.setRegiSpeechText("샘플 발화");
+        transactionRes.setOutput(output);
+        return new ResponseEntity<>(transactionRes,HttpStatus.OK);
     }
 }
